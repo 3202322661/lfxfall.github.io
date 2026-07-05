@@ -1,0 +1,216 @@
+:root {
+    --bg-color: #020617; /* 更深邃的背景 */
+    --text-color: #e2e8f0;
+    --accent-color: #3b82f6;
+    --sidebar-width: 320px;
+    --glass-bg: rgba(15, 23, 42, 0.6);
+    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+
+    /* --- 霓虹地形配色 (高饱和度+荧光) --- */
+    --c-wall: #1e293b;
+    --c-forest: #22c55e;
+    --c-swamp: #a16207;
+    --c-water: #0ea5e9;
+    --c-mountain: #94a3b8;
+    --c-lava: #ef4444;
+    --c-empty: rgba(255, 255, 255, 0.02);
+}
+
+body {
+    font-family: 'Segoe UI', 'Roboto Mono', monospace;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    height: 100vh;
+    overflow: hidden;
+    background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #020617 80%);
+}
+
+.main-layout { display: flex; height: 100%; width: 100%; }
+
+/* --- 侧边栏 --- */
+.sidebar {
+    width: var(--sidebar-width);
+    background: rgba(2, 6, 23, 0.9);
+    backdrop-filter: blur(10px);
+    border-right: var(--glass-border);
+    padding: 25px;
+    display: flex; flex-direction: column; gap: 20px;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+    z-index: 20; overflow-y: auto;
+}
+
+.brand h1 {
+    margin: 0; font-weight: 800; letter-spacing: 2px; font-size: 2rem;
+    background: linear-gradient(to right, #60a5fa, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
+}
+.version { font-size: 0.8rem; color: #64748b; letter-spacing: 2px; text-transform: uppercase; }
+
+/* --- 笔刷 --- */
+.tool-panel h3 { margin: 0 0 10px 0; font-size: 0.9rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+.brush-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.brush-btn {
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); color: #cbd5e1;
+    padding: 10px; border-radius: 8px; display: flex; align-items: center; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+}
+.brush-btn:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+.brush-btn.active {
+    background: rgba(59, 130, 246, 0.15); border-color: var(--accent-color); color: white;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+.color-box { width: 14px; height: 14px; border-radius: 3px; margin-right: 10px; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
+.color-box.wall { background: var(--c-wall); border: 1px solid #555; }
+.color-box.forest { background: var(--c-forest); box-shadow: 0 0 5px var(--c-forest); }
+.color-box.swamp { background: var(--c-swamp); }
+.color-box.water { background: var(--c-water); box-shadow: 0 0 5px var(--c-water); }
+.color-box.mountain { background: var(--c-mountain); }
+.color-box.lava { background: var(--c-lava); box-shadow: 0 0 5px var(--c-lava); }
+.color-box.empty { border: 1px dashed #666; }
+.cost { margin-left: auto; font-size: 0.75rem; opacity: 0.7; font-family: monospace; }
+.eraser { grid-column: span 2; }
+
+/* --- 算法信息 --- */
+.algo-info-panel { background: var(--glass-bg); padding: 20px; border-radius: 12px; border: var(--glass-border); }
+.algo-info-panel h2 { margin: 0 0 10px 0; color: var(--accent-color); font-size: 1.2rem; }
+.algo-info-panel p { font-size: 0.9rem; color: #94a3b8; line-height: 1.5; margin-bottom: 15px; }
+.algo-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; background: rgba(255,255,255,0.05); color: #94a3b8; }
+.tag.highlight { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+
+/* --- 右侧游戏区 --- */
+.game-area { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
+.dashboard { display: flex; gap: 15px; margin-bottom: 20px; width: 100%; max-width: 900px; }
+.stat-card {
+    background: var(--glass-bg); border: var(--glass-border); padding: 12px; border-radius: 12px;
+    text-align: center; flex: 1; backdrop-filter: blur(5px);
+    transition: transform 0.2s;
+}
+.stat-card:hover { transform: translateY(-3px); border-color: rgba(255,255,255,0.2); }
+.stat-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+.stat-value { font-size: 1.4rem; font-weight: 800; color: #fff; margin-top: 5px; }
+.stat-unit { font-size: 0.7rem; color: #475569; margin-left: 2px; }
+#stat-time { color: #facc15; } #stat-cost { color: #f472b6; } #stat-length { color: #4ade80; } #stat-visited { color: #22d3ee; }
+
+.controls {
+    background: var(--glass-bg); border: var(--glass-border); padding: 10px 20px; border-radius: 16px;
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+input[type="number"] { width: 45px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: white; text-align: center; border-radius: 4px; padding: 5px; }
+select, button { padding: 8px 16px; border-radius: 8px; border: none; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+select { background: #0f172a; color: white; border: 1px solid #334155; }
+.btn-action { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+.btn-action:hover { box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); transform: translateY(-1px); }
+.btn-start { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+.btn-start:hover { box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); transform: translateY(-1px); }
+.btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+.btn-danger:hover { box-shadow: 0 0 15px rgba(239, 68, 68, 0.4); transform: translateY(-1px); }
+.btn-apply { background: #334155; color: #94a3b8; }
+
+/* --- 网格核心样式 --- */
+#grid-container {
+    display: grid;
+    grid-template-columns: repeat(var(--cols), var(--cell-size));
+    grid-template-rows: repeat(var(--rows), var(--cell-size));
+    gap: 1px; padding: 8px; background: rgba(255,255,255,0.03);
+    border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.cell {
+    width: var(--cell-size); height: var(--cell-size);
+    background-color: var(--c-empty);
+    border-radius: 2px;
+    transition: transform 0.1s;
+    position: relative;
+}
+.cell:hover { z-index: 10; transform: scale(1.2); border: 1px solid white; box-shadow: 0 0 10px white; }
+
+/* --- 地形样式 (带动画) --- */
+.cell.wall { background: var(--c-wall); box-shadow: inset 0 0 0 2px black; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.cell.forest { background: var(--c-forest); opacity: 0.8; border-radius: 4px; transform: scale(0.9); box-shadow: 0 0 5px var(--c-forest); animation: growIn 0.4s ease-out; }
+.cell.swamp { background: var(--c-swamp); opacity: 0.9; border: 1px dashed #5c4018; animation: fadeIn 0.5s ease-out; }
+.cell.water { background: var(--c-water); opacity: 0.7; animation: rippleIn 0.5s ease-out; }
+.cell.mountain { background: var(--c-mountain); transform: scale(0.95); clip-path: polygon(50% 0%, 0% 100%, 100% 100%); animation: popIn 0.4s; }
+.cell.lava { background: var(--c-lava); box-shadow: 0 0 8px var(--c-lava); animation: pulseLava 1.5s infinite alternate; }
+
+/* 消失动画 */
+.cell.removing { animation: shrinkOut 0.3s forwards; }
+
+/* 起点终点 */
+.cell.start { 
+    background-color: transparent !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233b82f6'%3E%3Cpath d='M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z'/%3E%3C/svg%3E"); 
+    background-size: 80%; background-repeat: no-repeat; background-position: center; 
+    z-index: 5; filter: drop-shadow(0 0 10px #3b82f6); animation: float 2s infinite ease-in-out;
+}
+.cell.end { 
+    background-color: transparent !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef4444'%3E%3Cpath d='M14.4 6L14 4H5v17h2v-7h5.6l.4 2h7V6z'/%3E%3C/svg%3E"); 
+    background-size: 80%; background-repeat: no-repeat; background-position: center; 
+    z-index: 5; filter: drop-shadow(0 0 10px #ef4444); animation: float 2s infinite ease-in-out reverse;
+}
+
+/* 路径与搜索 */
+.cell.visited::after {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(6, 182, 212, 0.4); border-radius: 50%;
+    transform: scale(0); animation: expandVisited 0.4s forwards;
+}
+.cell.path::after {
+    content: ''; position: absolute; top: 20%; left: 20%; right: 20%; bottom: 20%;
+    background: #facc15; border-radius: 4px;
+    box-shadow: 0 0 15px #facc15;
+    transform: scale(0); animation: expandPath 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; z-index: 6;
+}
+
+/* --- 新增：赛博朋克滚动条 --- */
+
+/* 针对整个页面和侧边栏、游戏区 */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+    background-color: var(--bg-color);
+}
+
+/* 滚动槽 (轨道) */
+::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5); /* 深色半透明 */
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* 滚动滑块 */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #334155, #475569);
+    border-radius: 5px;
+    border: 2px solid var(--bg-color); /*以此制造滑块内缩的视觉效果*/
+}
+
+/* 滑块悬停 */
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #3b82f6, #60a5fa); /* 悬停时变亮蓝色 */
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+}
+
+/* 边角 */
+::-webkit-scrollbar-corner {
+    background: var(--bg-color);
+}
+
+/* --- 关键帧动画 --- */
+@keyframes popIn { 0% { transform: scale(0); } 80% { transform: scale(1.1); } 100% { transform: scale(1); } }
+@keyframes growIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(0.9); opacity: 0.8; } }
+@keyframes rippleIn { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 0.7; } }
+@keyframes shrinkOut { to { transform: scale(0); opacity: 0; } }
+@keyframes pulseLava { from { opacity: 0.6; box-shadow: 0 0 5px var(--c-lava); } to { opacity: 1; box-shadow: 0 0 15px var(--c-lava); } }
+@keyframes float { 0%, 100% { transform: translateY(0) scale(1.2); } 50% { transform: translateY(-5px) scale(1.2); } }
+@keyframes expandVisited { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes expandPath { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 0.9; } }
+
+@media (max-width: 900px) {
+    .main-layout { flex-direction: column; overflow-y: auto;}
+    .sidebar { width: 100%; border-right: none; height: auto; }
+}
